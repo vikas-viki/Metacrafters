@@ -1,4 +1,4 @@
-# Contracts README
+# Contracts
 
 This README provides a brief overview of the three contracts available in the provided code.
 
