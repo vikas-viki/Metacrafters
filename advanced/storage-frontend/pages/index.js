@@ -1,47 +1,26 @@
-// import required modules
-// the essential modules to interact with frontend are below imported.
-// ethers is the core module that makes RPC calls using any wallet provider like Metamask which is esssential to interact with Smart Contract
 import { ethers } from "ethers";
-// A single Web3 / Ethereum provider solution for all Wallets
 import Web3Modal from "web3modal";
-// yet another module used to provide rpc details by default from the wallet connected
 import WalletConnectProvider from "@walletconnect/web3-provider";
-// react hooks for setting and changing states of variables
 import { useEffect, useState } from 'react';
 
 export default function Home() {
-  // env variables are initalised
-  // contractAddress is deployed smart contract addressed 
-  const contractAddress = process.env.CONTRACT_ADDRESS
-  // application binary interface is something that defines structure of smart contract deployed.
-  const abi = process.env.ABI
+  const contractAddress = process.env.CONTRACT_ADDRESS;
+  const abi = process.env.ABI;
 
-  // hooks for required variables
-  const [provider, setProvider] = useState();
-
-  // response from read operation is stored in the below variable
-  const [storedNumber, setStoredNumber] = useState();
-
-  // the value entered in the input field is stored in the below variable
   const [enteredNumber, setEnteredNumber] = useState(0);
-
-  // the variable is used to invoke loader
-  const [storeLoader, setStoreLoader] = useState(false)
-  const [retrieveLoader, setRetrieveLoader] = useState(false)
+  const [storeLoader, setStoreLoader] = useState(false);
+  const [contract, setContract] = useState(null);
+  const [guessed, setGuessed] = useState(false);
 
   async function initWallet() {
     try {
-      // check if any wallet provider is installed. i.e metamask xdcpay etc
       if (typeof window.ethereum === 'undefined') {
-        console.log("Please install wallet.")
-        alert("Please install wallet.")
-        return
-      }
-      else {
-        // raise a request for the provider to connect the account to our website
+        console.log("Please install a wallet.");
+        alert("Please install a wallet.");
+        return;
+      } else {
         const web3ModalVar = new Web3Modal({
           cacheProvider: true,
-          network: "mainnet",
           providerOptions: {
             walletconnect: {
               package: WalletConnectProvider,
@@ -51,134 +30,153 @@ export default function Home() {
 
         const instanceVar = await web3ModalVar.connect();
         const providerVar = new ethers.providers.Web3Provider(instanceVar);
-        const network = await providerVar.getNetwork();
-        setProvider(providerVar)
-        readNumber(providerVar)
-        if (network.chainId !== 11155111) {
-          alert("Please switch to sepolia chain to access.");
+        const signer = providerVar.getSigner();
+        const smartContract = new ethers.Contract(contractAddress, abi, signer);
+        setContract(smartContract);
+        const balance = await providerVar.getBalance(contractAddress);
+        if (!Number(balance._hex).toString().includes('3')) {
+          setGuessed(true);
         }
-        return
+
+        return;
       }
-
     } catch (error) {
-      console.log(error)
-      return
+      console.log(error);
+      return;
     }
   }
 
-  async function readNumber(provider) {
-    try {
-      setRetrieveLoader(true)
-      const signer = provider.getSigner();
-
-      // initalize smartcontract with the essentials detials.
-      const smartContract = new ethers.Contract(contractAddress, abi, provider);
-      const contractWithSigner = smartContract.connect(signer);
-
-      // interact with the methods in smart contract
-      const response = await contractWithSigner.readNum();
-
-      console.log(parseInt(response))
-      setStoredNumber(parseInt(response))
-      setRetrieveLoader(false)
-      return
-    } catch (error) {
-      alert(error)
-      setRetrieveLoader(false)
-      return
+  async function guessNumber() {
+    if (contract == null) {
+      await initWallet();
+    } else {
+      try {
+        setStoreLoader(true);
+        const guessNumTX = await contract.guessNumber(enteredNumber);
+        if (guessNumTX === true) {
+          alert("Hurray you guessed it!");
+        } else {
+          alert("That wasn't correct, try again.");
+        }
+        setStoreLoader(false);
+        return;
+      } catch (error) {
+        alert(error);
+        setStoreLoader(false);
+        return;
+      }
     }
   }
 
-  async function writeNumber() {
-    try {
-      setStoreLoader(true)
-      const signer = provider.getSigner();
-      const smartContract = new ethers.Contract(contractAddress, abi, provider);
-      const contractWithSigner = smartContract.connect(signer);
+  function getRandomNumber() {
+    const baseNumber = Math.floor(Math.random() * 1001); // 0 to 1000
+    const complexity = Math.floor(Math.random() * 51); // Random complexity between 0 and 50
+    const direction = Math.random() < 0.5 ? -1 : 1; // Random direction: -1 or 1
+    return baseNumber + (complexity * direction);
+  }
 
-      // interact with the methods in smart contract as it's a write operation, we need to invoke the transation usinf .wait()
-      const writeNumTX = await contractWithSigner.writeNum(enteredNumber);
-      const response = await writeNumTX.wait()
-      console.log(await response)
-      setStoreLoader(false)
-
-      alert(`Number stored successfully ${enteredNumber}`)
-      return
-
-    } catch (error) {
-      alert(error)
-      setStoreLoader(false)
-      return
+  async function setNumber() {
+    const randomNumber = getRandomNumber();
+    if (contract == null) {
+      await initWallet();
+    } else {
+      setStoreLoader(true);
+      try {
+        const val = ethers.utils.parseEther('3'); // Convert 3 ethers to wei
+        const tx = await contract.setNumber(randomNumber, { value: val });
+        await tx.wait();
+        setStoreLoader(false);
+      } catch (error) {
+        console.error(error.message);
+        setStoreLoader(false);
+      }
     }
   }
 
   useEffect(() => {
     initWallet();
-  }, [])
-
+  }, []);
 
   return (
     <div className='m-6 space-y-4'>
       <h1 className="text-gray-700 text-3xl font-bold">
-        Storage Frontend Demo
+        Feeling Lucky?
       </h1>
-
-      <h3>This action retrieves the saved number from smart contract. (i.e Read Operation)</h3>
-      <button className='px-4 py-1 bg-slate-300 hover:bg-slate-500 flex justify-around transition-all w-32' onClick={() => readNumber(provider)}> {retrieveLoader ? (
-        <svg
-          className="animate-spin m-1 h-5 w-5 text-white"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75 text-gray-700"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-      ) : "RETRIEVE"} </button>
-      <h4>The stored number is <span className='font-bold'>{storedNumber ? storedNumber : 0}</span> </h4>
-      <hr></hr>
-
-      <h3>This action saves entered number into the smart contract. (i.e Write Operation) </h3>
+      <h1>{guessed === true ? "Ohh! someone already guessed it." : "The reward is waiting for you."}</h1>
+      <h3>Guess the number below (from 0 to 1000) and win <b>3 Sepolia ETH.</b></h3>
       <div>
-        <input onChange={(e) => {
-          setEnteredNumber(e.target.value);
-        }} className="placeholder:italic transition-all placeholder:text-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" placeholder="Enter a number to store" type="text" name="store" />
+        <input
+          onChange={(e) => {
+            setEnteredNumber(e.target.value);
+          }}
+          className="placeholder-italic transition-all placeholder-gray-500 w-4/6 border border-gray-500 rounded-md p-2 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm"
+          placeholder="Enter a number to guess"
+          type="text"
+          name="guess"
+        />
       </div>
-      <button onClick={writeNumber} className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'> {storeLoader ? (
-        <svg
-          className="animate-spin m-1 h-5 w-5 text-white"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75 text-gray-700"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-          ></path>
-        </svg>
-      ) : "STORE"} </button>
 
+      <button
+        onClick={guessNumber}
+        className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'
+      >
+        {storeLoader ? (
+          <svg
+            className="animate-spin m-1 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75 text-gray-700"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        ) : (
+          <span>Guess</span>
+        )}
+      </button>
+      <hr /><br />
+      <span className="pt-[10px]">For project hoster to reset number and fund the contract again ⚡.</span><br />
+      <button
+        onClick={setNumber}
+        className='px-4 py-1 bg-slate-300 flex justify-around hover:bg-slate-500 transition-all w-32'
+      >
+        {storeLoader ? (
+          <svg
+            className="animate-spin m-1 h-5 w-5 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75 text-gray-700"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+        ) : (
+          <span>Set number</span>
+        )}
+      </button>
 
     </div>
-  )
+  );
 }

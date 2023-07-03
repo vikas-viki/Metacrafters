@@ -3,8 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   env: {
-    CONTRACT_ADDRESS:"0xD1B2dd8AF6E311863f6dD423B470699f73c78713",
-    ABI:[
+    CONTRACT_ADDRESS: "0x0E088A7e4d3cEf6a5E913f60B6Bd9213Dd2a2723",
+    ABI: [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
       {
         "inputs": [
           {
@@ -13,22 +18,28 @@ const nextConfig = {
             "type": "uint256"
           }
         ],
-        "name": "writeNum",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-      },
-      {
-        "inputs": [],
-        "name": "readNum",
+        "name": "guessNumber",
         "outputs": [
           {
-            "internalType": "uint256",
+            "internalType": "bool",
             "name": "",
-            "type": "uint256"
+            "type": "bool"
           }
         ],
         "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "_num",
+            "type": "uint256"
+          }
+        ],
+        "name": "setNumber",
+        "outputs": [],
+        "stateMutability": "payable",
         "type": "function"
       }
     ]
