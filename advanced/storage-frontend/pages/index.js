@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useEffect, useState } from 'react';
+import Head from 'next/head';
 
 export default function Home() {
   const contractAddress = process.env.CONTRACT_ADDRESS;
@@ -99,6 +100,9 @@ export default function Home() {
 
   return (
     <div className='m-6 space-y-4'>
+      <Head>
+        <title>Check Your Luck</title>
+      </Head>
       <h1 className="text-gray-700 text-3xl font-bold">
         Feeling Lucky?
       </h1>
