@@ -1,4 +1,4 @@
-## Vesting Contract, ![Live](https://tokenvesting.vercel.app/)
+## Vesting Contract, [see live](https://tokenvesting.vercel.app/)
 
 This contract is designed to facilitate a vesting mechanism for organizations that issue tokens. It allows organizations to register and manage their token vesting details. Users who are white-listed by an organization can withdraw their vested tokens once the vesting period has ended.
 
