@@ -4,203 +4,10 @@ import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
-
 export default function Home() {
 
-  const contractAddress = '0xc239949AeC1507Db7c1C62671531AFc8E025478B';
-  const abi = [
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_organization",
-          "type": "address"
-        },
-        {
-          "internalType": "string",
-          "name": "_tokenName",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_totalSupply",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string",
-          "name": "_tokenSymbol",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_vestingPeriod",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool[]",
-          "name": "_whiteListed",
-          "type": "bool[]"
-        },
-        {
-          "internalType": "address[]",
-          "name": "_stakeholders",
-          "type": "address[]"
-        },
-        {
-          "internalType": "string[]",
-          "name": "_stakeholderType",
-          "type": "string[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_vestedAmt",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "register",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_user",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
-          "name": "_organization",
-          "type": "address"
-        }
-      ],
-      "name": "withdrawTokens",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_user",
-          "type": "address"
-        }
-      ],
-      "name": "isOrg",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "organisationName",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "organisations",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "tokenName",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "tokenSymbol",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "totalSupply",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "releaseTime",
-          "type": "uint256"
-        },
-        {
-          "internalType": "contract Token",
-          "name": "token",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "name": "orgs",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
+  const contractAddress = process.env.CONTRACT_ADDRESS;
+  const abi = process.env.ABI;
 
   const [contract, setContract] = useState(null);
   const [tokenName, setTokenName] = useState("");
@@ -214,6 +21,9 @@ export default function Home() {
   const [vestors, setVestors] = useState([{ address: "", type: "founder", whiteListed: false, amount: "" }]);
   const [org, setOrg] = useState();
   const [loading, setLoading] = useState(false);
+  const [orgs, setOrgs] = useState(null);
+  const [withdrawOrg, setWithdrawOrg] = useState("");
+  const [remainingTime, setRemainingTime] = useState("");
 
   async function initWallet() {
     try {
@@ -253,16 +63,32 @@ export default function Home() {
   }
 
   async function checkIfOrg() {
-    await checkIfConnected();
-    setLoading(true);
-    const tx = await contract.isOrg(signer.address);
-    if (tx == true) {
-      setIsOrg(true);
-      const _org = await contract.organisations(signer.address);
-      console.log(org);
-      setOrg(_org);
+    try {
+      await checkIfConnected();
+      setLoading(true);
+      const tx = await contract.isOrg(signer.address);
+      if (tx == true) {
+        setIsOrg(true);
+        const _org = await contract.getOrgDetails(signer.address);
+        console.log(_org);
+        setOrg(_org);
+      }
+      setLoading(false);
+    } catch (error) {
+
     }
-    setLoading(false);
+  }
+
+  async function getOrg(_org) {
+    try {
+      const tx = await contract.getOrgDetails(_org);
+      const timestamp = Number(tx[6]); // Replace with your actual timestamp
+      const date = new Date(timestamp * 1000); // Multiply by 1000 to convert from seconds to milliseconds
+      const formattedDate = date.toString();
+      setRemainingTime(formattedDate);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   useEffect(() => {
@@ -284,36 +110,43 @@ export default function Home() {
   }
 
   function convertToTimestamp(obj) {
-    const millisecondsPerMinute = 60;
-    const millisecondsPerHour = 60 * millisecondsPerMinute;
-    const millisecondsPerDay = 24 * millisecondsPerHour;
+    const secondsPerMinute = 60;
+    const secondsPerHour = 60 * 60;
+    const secondsPerDay = 24 * (60 * 60);
 
     const { days, hours, minutes } = obj;
-    const timestamp = (Number(days) * millisecondsPerDay) + (Number(hours) * millisecondsPerHour) + (Number(minutes) * millisecondsPerMinute) / 1000;
+    const timestamp = (Number(days) * secondsPerDay) + (Number(hours) * secondsPerHour) + (Number(minutes) * secondsPerMinute);
     return timestamp;
   }
 
   async function registerOrg() {
-    checkIfConnected();
-    var whitelist = [];
-    var stakeholders = [];
-    var holderType = [];
-    var vesterAmt = [];
-    var vestingTime = convertToTimestamp(vestingPeriod);
-    var totalVestAmt = 0;
-    vestors.map(el => {
-      whitelist.push(el.whiteListed);
-      stakeholders.push(el.address);
-      holderType.push(el.type);
-      vesterAmt.push(el.amount);
-      totalVestAmt += el.amount;
-    });
-    if (totalVestAmt > tokenSupply) {
-      alert('Vested amount is greater than total supply.');
-      return;
+    try {
+      checkIfConnected();
+      var whitelist = [];
+      var stakeholders = [];
+      var holderType = [];
+      var vesterAmt = [];
+      var vestingTime = convertToTimestamp(vestingPeriod);
+      console.log({ vestingPeriod })
+      var totalVestAmt = 0;
+      vestors.map(el => {
+        whitelist.push(el.whiteListed);
+        stakeholders.push(el.address);
+        holderType.push(el.type);
+        vesterAmt.push(el.amount);
+        totalVestAmt += el.amount;
+      });
+      if (totalVestAmt > tokenSupply) {
+        alert('Vested amount is greater than total supply.');
+        return;
+      }
+      console.log(signer.address, tokenName, tokenSupply, tokenSymbol, vestingTime, whitelist, stakeholders, holderType, vesterAmt)
+      const tx = await contract.register(signer.address, tokenName, tokenSupply, tokenSymbol, vestingTime, whitelist, stakeholders, holderType, vesterAmt);
+      console.log(tx);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
     }
-    const tx = await contract.register(signer.address, tokenName, tokenSupply, tokenSymbol, vestingTime, whitelist, stakeholders, holderType, vesterAmt);
-    console.log(tx);
   }
 
   function getDate(_timeStamp) {
@@ -321,7 +154,35 @@ export default function Home() {
     console.log(_timeStamp);
     const date = new Date(timestamp);
 
-    return String(date).split("(").slice(0, 1).join(" ").split(" ").slice(0, 5).join(" ");
+    return String(date).split(" (")[0];
+  }
+
+  async function getOrgs() {
+    try {
+      checkIfConnected();
+      const tx = await contract.getOrgs();
+      setOrgs(tx);
+      getOrg(tx[0][0]);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function withdraw() {
+    try {
+      if (withdrawOrg.length == 0) {
+        console.log(signer.address, orgs[0][0]);
+        const tx = await contract.withdrawTokens(signer.address, orgs[0][0]);
+        console.log(tx);
+      } else {
+        console.log(signer.address, withdrawOrg);
+        const tx = await contract.withdrawTokens(signer.address, withdrawOrg);
+        console.log(tx);
+      }
+    } catch (error) {
+      alert(error.message.split(": \"")[1].split("\" (")[0]);
+      console.log(error);
+    }
   }
 
   return (
@@ -332,7 +193,7 @@ export default function Home() {
       <h1 className="font-bold text-[40px] leading-4 p-[20px] mt-[20px] mb-[40px]">Vesting</h1>
       <div className="flex w-full flex-col gap-[30px] items-center justify-center border-b-2 py-[20px] border-indigo-500">
         <div className="flex gap-[30px]">
-          <button className="border-2 rounded-[6px] border-indigo-500 bg-indigo-500 p-[10px] font-semibold" onClick={() => { setType("stakeholder") }}>Stakeholder</button>
+          <button className="border-2 rounded-[6px] border-indigo-500 bg-indigo-500 p-[10px] font-semibold" onClick={() => { setType("stakeholder"); getOrgs(); }}>Stakeholder</button>
           <button className="border-2 rounded-[6px] border-indigo-500 bg-indigo-500 p-[10px] font-semibold" onClick={() => { setType("Organization"); checkIfOrg(); }}>Organization</button>
         </div>
       </div>
@@ -340,7 +201,19 @@ export default function Home() {
       <div className="my-[50px] ">
         {type !== null && (
           type === "stakeholder" ? (
-            <h1>Stakeholder</h1>
+            (orgs != null && orgs[0].length > 0) ? (
+              <div className="flex gap-[30px] w-full justify-center items-center">
+                <span>{remainingTime}</span>
+                <select className="p-[7px] text-[15px] border-2 border-black outline-none rounded" onChange={(e) => { setWithdrawOrg(e.target.value); getOrg(e.target.value); }}>
+                  {orgs[0].map((el, i) => {
+                    return <option value={el} key={i}>{orgs[1][i]}</option>
+                  })}
+                </select>
+                <button className="border-2 rounded-[6px] border-sky-600 bg-sky-600 p-[10px] font-semibold m-auto w-full" onClick={withdraw}>Withdraw</button>
+              </div>
+            ) : (
+              <h1 className="text-[20px]">No Organisations has registered yet.</h1>
+            )
 
           ) : (
             (isOrg == true && org !== undefined && loading == false) ? (
@@ -350,12 +223,42 @@ export default function Home() {
                   <span className="text-[20px] font-semibold">Name: {org[0]}</span>
                   <span className="text-[20px] font-semibold">Symbol: {org[1]}</span>
                   <span className="text-[20px] font-semibold">Total Supply: {Number(org[2])}</span>
-                  <span className="text-[20px] font-semibold">Vesting time: {getDate(org[3])}</span>
+                  <span className="text-[20px] font-semibold">Vesting time: {getDate(org[6])}</span>
+                  <table className="border-collapse border-2 border-gray-300">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="p-2 border-b-2 border-gray-300">Address</th>
+                        <th className="p-2 border-b-2 border-gray-300">Whitelisted</th>
+                        <th className="p-2 border-b-2 border-gray-300">Type</th>
+                        <th className="p-2 border-b-2 border-gray-300">Amount</th>
+                        <th className="p-2 border-b-2 border-gray-300">Withdrawn</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {org[3].map((el, i) => (
+                        <tr key={i} className={`${i % 2 === 0 ? "bg-gray-100" : "bg-white"} items-center justify-center text-center`}>
+                          <td className="p-2 border-2 border-gray-300">{el}</td>
+                          <td className="p-2 border-2 border-gray-300">{String(org[4][i])}</td>
+                          <td className="p-2 border-2 border-gray-300">{org[5][i]}</td>
+                          <td className="p-2 border-2 border-gray-300">{Number(org[8][i])}</td>
+                          <td className="p-2 border-2 border-gray-300">
+                            {org[7][i] === true ? (
+                              <span className="font-bold text-[20px] rounded-[50%] py-[3px] px-[12px] cursor-pointer select-none bg-green-500 text-white">+</span>
+                            ) : (
+                              <span className="font-bold text-[20px] rounded-[50%] py-[3px] px-[12px] cursor-pointer select-none bg-orange-500 text-white">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+
                 </div>
               </div>
             ) : (
               <div className="w-full flex flex-col flex-wrap gap-[30px] justify-center items-center">
-                <button className="border-2 rounded-[6px] border-sky-500 bg-sky-500 p-[10px] font-semibold" onClick={() => { setRegisterClicked(true); }}>Register as Organization</button>
+                <button className="border-2 rounded-[6p6] border-sky-600 bg-sky-500 p-[10px] font-semibold" onClick={() => { setRegisterClicked(true); }}>Register as Organization</button>
                 {
                   registerClicked === true && (
                     <form className="flex flex-col flex-wrap gap-[30px] justify-start items-start" onSubmit={(e) => { e.preventDefault(); registerOrg(); }}>
@@ -408,3 +311,7 @@ export default function Home() {
     </main>
   );
 }
+
+/*
+  re factor the uri of org dertails andd verification that vested amount for anybody must not be 0.
+*/
