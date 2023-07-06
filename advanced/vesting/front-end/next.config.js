@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     env: {
-        CONTRACT_ADDRESS: "0x7a56C8605695De4f6D6233a2DDb533f583872E5f",
+        CONTRACT_ADDRESS: "0x81b85BA382d2365665075a560Ed472a873B82cc3",
         ABI:[
           {
             "inputs": [],
