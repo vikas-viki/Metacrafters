@@ -53,4 +53,18 @@ Self destruct:= a feature which allows send the remining funds of the contract t
 Front running:= as we know the transactions are availiable to public before it is added to blockchain, an attacker can watch out for transaction with huge worth and send hid transaction before that trasaction with higher gas fee, leading to profilt led by that huge transaction after its execution. (Sol: submit txn with average fee not too low).
 
 
-Slither: 
+Slither: to check for certainc checks in conrtracts.
+
+Fuzzing: Finding the implementation bugs in contracts. The process of fuzzing involves sending random inputs to your program to make sure that you can detect any edge cases that would make the program fail. Testing with non-standard inputs is a great way to find weak links that might go unnoticed.
+
+WHY FUZZING?
+- Fuzzing not only identifies a problem but also shows its cause and how an attacker
+may interact with it in a real-life attack.
+- Fuzzing proves a vulnerability exists without having to sift through false positives.
+- Fuzzing is fully automated and can run independently for days or even weeks,
+identifying as many vulnerabilities as possible in a system under test.
+- Fuzzing is highly useful for developers. The role of developers is to develop and
+improve product features. While traditional security tools only point out flaws,
+fuzzers show the result of the flaw and demonstrate the impact of solving it.
+
+Forge by foundy for fuzz testing.
