@@ -1,0 +1,56 @@
+Security practises.
+
+1. Monitor and upgrade dependencies
+   Use stable Solidity versions
+   Avoid floating pragmas(dont use ^ or <= use clear ones such as 0.8.12).
+
+2. Use the check, effects, interaction pattern
+   Require, update value, make smart contract calls(have require() statements).
+   Fix the warnings
+   KISS - keep it simple silly
+   Keep it as modular as possible 
+
+3. Always protect withdrawal functions (by using re entrancy guards).
+   Avoid selfdestruct
+   Modifiers shouldn’t update the state
+   Use Reentrancy Guard wherever required
+
+4. Sending ETH and Randomness in contracts
+   Send ETH via call (avoid using transfer & send).
+   Avoid pseudo randomness - can use Chainlink VRF (user for random variables generation and all).
+   Avoid tx.origin, use msg.sender
+
+5. Arithmetic operations, allowance and address checks
+   Divide before multiply (as no decimals are used, divie things to be divided before so that we can multiply then and safeguard our decimals, if we divide after multiply we will loose certain decimals).
+   Use increaseAllowance and decreaseAllowance instead of approve: Implemented by OpenZeppelin already, because once you approved to spend 100 tokens and once it is spent you can still spend 100 tokens, so these.(see https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/edit)
+   Always check for address(0x0)
+
+6. Test everything possible
+  Always test extreme cases during external integrations. For example: Can Sushiswap run out of liquidity?
+   Mainnet forking - Fork and test on the real environment.
+   Don’t make useless optimizations: security is of the highest importance(in remix and all, compiler>optimization)
+
+7. CI/CD Best Practices
+   Make sure that you are running tests on every PR(pull request/change) that has been pushed and mandate that all pass
+   Mandate >90% code coverage
+   Mandate that code is properly formatted (documentation and all)
+
+
+Security Audit. (https://secureum.substack.com/p/audit-techniques-and-tools-101 for deep dive)
+
+	what an audit is and what it includes ?
+
+	It detects and describes (in a report) security issues with underlying vulnerabilities, 		severity/difficulty, potential exploit scenarios, and recommended fixes.
+	It also provides subjective insights into code quality, documentation, and testing.
+	The scope/depth/format of audit reports varies across auditing teams but they generally cover 	similar 	aspects.
+
+// for some of tools https://www.getsecureworld.com/blog/top-10-solidity-smart-contract-audit-tools/
+
+Re-entrancy attack:= happens when a conract recursive calls another contract before the the state is updated by the previous call of that contract. 
+
+Self destruct:= a feature which allows send the remining funds of the contract to a designated address and destroys the contract (removes from global state).
+
+Front running:= as we know the transactions are availiable to public before it is added to blockchain, an attacker can watch out for transaction with huge worth and send hid transaction before that trasaction with higher gas fee, leading to profilt led by that huge transaction after its execution. (Sol: submit txn with average fee not too low).
+
+
+Slither: 
