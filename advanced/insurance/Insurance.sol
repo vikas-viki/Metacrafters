@@ -63,7 +63,7 @@ contract InsuranceFactory {
         uint256 collatThreshold
     ) public returns (address) {
         address collatIns = userCollateralInsurance[msg.sender];
-        require(collatIns != address(0), "No insurance created.");
+        require(collatIns == address(0), "Insurance already created.");
         CollateralInsurance newCI = new CollateralInsurance(
             owner,
             premiumAmt,
@@ -88,7 +88,14 @@ contract InsuranceFactory {
         return true;
     }
 
-    function getUserInsurance() public view returns(address, address){
-        return(userCollateralInsurance[msg.sender], userWalletInsurance[msg.sender]);
+    function getUserInsurance() public view returns (address, address) {
+        return (
+            userCollateralInsurance[msg.sender],
+            userWalletInsurance[msg.sender]
+        );
+    }
+
+    function fillFunds() public payable returns (uint256) {
+        return (address(this).balance);
     }
 }
