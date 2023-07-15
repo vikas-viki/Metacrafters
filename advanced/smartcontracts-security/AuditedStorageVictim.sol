@@ -11,16 +11,11 @@ contract StorageVictim {
 
     mapping(address => Storage) internal storages;
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "only owner can call.");
-        _;
-    }
-
     constructor() {
         owner = msg.sender;
     }
 
-    function store(uint256 _amount) public onlyOwner {
+    function store(uint256 _amount) public {
         Storage storage str = storages[msg.sender];
 
         str.user = msg.sender;

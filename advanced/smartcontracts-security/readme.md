@@ -19,26 +19,21 @@ It is recomended to specify the scope of the varible to prioritize the use and a
 
 **Fix `mapping(address => Storage) internal storages;`**
 
-**`4. store(uint256 _amount)`**
-- 
-It is always recomended to restrict the access of the certain functions being called by every user which might be vulnerable. onlyOwner is modifier which allows only owner to call the function.
 
-**Fix `store(uint256 _amount) public onlyOwner `**
-
-**`5. StorageVictim()`**
+**`4. StorageVictim()`**
 - 
 In latest version of solidity, functions are not allowed to have same name as contract name, if it is a constructor, it has to be renamed as constructor and it doesn't have any scope to be declared with.
 
 **Fix `constructor()`**
 
-**`6. store(uint _amount)`**
+**`5. store(uint _amount)`**
 - 
 Data location for the variables must be specified, it can be either **storage** (storage location in Solidity) or **memory** (temporary memory location in Solidity) and it cannot be unspecified and the memory location must be specified .
 
 **Fix `Storage storage str = storages[msg.sender];`**
 
 
-**`7. getStore()`**
+**`6. getStore()`**
 - 
 Data location for the variables must be specified, it can be either **storage** (storage location in Solidity) or **memory** (temporary memory location in Solidity) and it cannot be unspecified.
 
@@ -70,6 +65,6 @@ INFO:Detectors: `
 StorageVictim.owner (AuditedStorageVictim.sol#5) should be immutable `
 
 
-INFO:Slither:AuditedStorageVictim.sol analyzed (1 contracts with 88 detectors), 4 result(s) found
+INFO:Slither: `AuditedStorageVictim.sol analyzed (1 contracts with 88 detectors), 4 result(s) found`
 
 **Fix `address immutable owner;`**
