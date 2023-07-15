@@ -68,6 +68,8 @@ INFO:Detectors:
 
 INFO:Detectors: `
 StorageVictim.owner (AuditedStorageVictim.sol#5) should be immutable `
+
+
 INFO:Slither:AuditedStorageVictim.sol analyzed (1 contracts with 88 detectors), 4 result(s) found
 
 **Fix `address immutable owner;`**
