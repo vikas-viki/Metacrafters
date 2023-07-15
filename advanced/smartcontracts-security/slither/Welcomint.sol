@@ -6,12 +6,7 @@ import "./@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./@openzeppelin/contracts/utils/Counters.sol";
 import "./@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "./ReentrancyGuard.sol";
-/*
-pip3 install solc-select
-solc-select install 0.8.9
-solc-select use 0.8.9
-slither Storage.sol
-*/
+
 contract Welcomint is ERC721, ERC721URIStorage, ERC721Enumerable, ReentrancyGuard {
     using Counters for Counters.Counter;
     Counters.Counter private tokenIds;

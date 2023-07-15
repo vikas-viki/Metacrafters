@@ -54,6 +54,12 @@ Front running:= as we know the transactions are availiable to public before it i
 
 
 Slither: to check for certainc checks in conrtracts.
+/*
+pip3 install solc-select
+solc-select install 0.8.9
+solc-select use 0.8.9
+slither Storage.sol
+*/
 
 Fuzzing: Finding the implementation bugs in contracts. The process of fuzzing involves sending random inputs to your program to make sure that you can detect any edge cases that would make the program fail. Testing with non-standard inputs is a great way to find weak links that might go unnoticed.
 
