@@ -35,7 +35,7 @@ Data location for the variables must be specified, it can be either **storage** 
 
 **`6. getStore()`**
 - 
-Data location for the variables must be specified, it can be either **storage** (storage location in Solidity) or **memory** (temporary memory location in Solidity) and it cannot be unspecified.
+Storage location for the variables must be specified, it can be either **storage** (storage location in Solidity) or **memory** (temporary memory location in Solidity) and it cannot be unspecified.
 
 **Fix `Storage storage str;`**
 
