@@ -14,6 +14,7 @@ import "./SimpleAccount.sol";
  */
 contract SimpleAccountFactory {
     SimpleAccount public immutable accountImplementation;
+    mapping(address => SimpleAccount) public SmartAccounts;
 
     constructor(IEntryPoint _entryPoint) {
         accountImplementation = new SimpleAccount(_entryPoint);
