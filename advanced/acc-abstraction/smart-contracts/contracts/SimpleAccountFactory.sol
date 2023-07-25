@@ -36,6 +36,7 @@ contract SimpleAccountFactory {
                 address(accountImplementation),
                 abi.encodeCall(SimpleAccount.initialize, (owner))
             )));
+            SmartAccounts[owner] = ret;
     }
 
     /**
@@ -50,4 +51,9 @@ contract SimpleAccountFactory {
                 )
             )));
     }
+
+    function getAcount(address owner) public view returns(SimpleAccount){
+        return (SmartAccounts[owner]);
+    }
+
 }
